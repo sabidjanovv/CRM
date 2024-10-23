@@ -45,7 +45,7 @@ export class AuthService {
     });
   }
 
-  async siginup(createAuthDto: CreateAuthDto, res: Response) {
+  async signup(createAuthDto: CreateAuthDto, res: Response) {
     const candidate = await this.prismaService.user.findUnique({
       where: {
         email: createAuthDto.email,
@@ -140,7 +140,7 @@ export class AuthService {
     }
   }
 
-  create(createAuthDto: CreateAuthDto) {
+  async create(createAuthDto: CreateAuthDto) {
     return 'This action adds a new auth';
   }
 
