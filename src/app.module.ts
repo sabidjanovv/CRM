@@ -6,9 +6,10 @@ import { BranchModule } from './branch/branch.module';
 import { RoleModule } from './role/role.module';
 import { LidStatusModule } from './lid_status/lid_status.module';
 import { ReasonLidModule } from './reason_lid/reason_lid.module';
+import { StaffModule } from './staff/staff.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({envFilePath:".env", isGlobal: true}), PrismaModule, AuthModule, BranchModule, RoleModule, LidStatusModule, ReasonLidModule ],
+  imports: [ConfigModule.forRoot({envFilePath:".env", isGlobal: true}), PrismaModule, AuthModule, BranchModule, RoleModule, LidStatusModule, ReasonLidModule, StaffModule ],
   controllers: [],
   providers: [],
 })

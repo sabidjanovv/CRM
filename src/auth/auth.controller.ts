@@ -7,6 +7,9 @@ import {
   Param,
   Delete,
   Res,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
@@ -14,8 +17,14 @@ import { UpdateAuthDto } from './dto/update-auth.dto';
 import { Response } from 'express';
 import { CookieGetter } from '../decorators/cookieGetter.decorator';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AccessTokenGuard, RefreshTokenGuard } from '../common/guards';
+import { GetCurrentUser, Public } from '../common/decorators';
+import { HttpStatusCode } from 'axios';
+import { GetCurrentUserId } from '../common/decorators/get-current-user-id.decorator';
+import { JwtPayloadWithRefreshToken, ResponseFields } from '../common/types';
 
 @ApiTags('Auth')
+@UseGuards(AccessTokenGuard)
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -26,6 +35,7 @@ export class AuthController {
     description: 'User created successfully',
     type: CreateAuthDto,
   })
+  @Public()
   @Post('signup')
   async signup(
     @Body() createAuthDto: CreateAuthDto,
@@ -43,6 +53,7 @@ export class AuthController {
     status: 401,
     description: 'Invalid credentials',
   })
+  @Public()
   @Post('signin')
   async signin(
     @Body('email') email: string,
@@ -52,18 +63,26 @@ export class AuthController {
     return this.authService.signin(email, password, res);
   }
 
+
+
   @ApiOperation({ summary: 'Sign out a user' })
   @ApiResponse({
     status: 200,
     description: 'User signed out successfully',
   })
+  @Public()
+  @UseGuards(RefreshTokenGuard)
   @Post('signout')
+  @HttpCode(HttpStatus.OK)
   async signout(
-    @Body('userId') userId: number,
+    // @Body('userId') userId: number,
+    @GetCurrentUserId() userId: number,
     @Res({ passthrough: true }) res: Response,
-  ) {
-    return this.authService.signout(userId, res);
+  ): Promise<boolean>{
+    return this.authService.signout(+userId, res);
   }
+
+
 
   @ApiOperation({ summary: 'Refresh token' })
   @ApiResponse({
@@ -74,14 +93,19 @@ export class AuthController {
     status: 401,
     description: 'Refresh token is invalid',
   })
-  @Post('refresh/:id')
+  @Public()
+  @UseGuards(RefreshTokenGuard)
+  @Post('refresh')
   async refreshToken(
-    @Param('id') id: number,
-    @CookieGetter('refresh_token') refresh_token: string,
+    @GetCurrentUserId() userId: number,
+    @GetCurrentUser('refreshToken') refreshToken: string,
+    @GetCurrentUser() user: JwtPayloadWithRefreshToken,
     @Res({ passthrough: true }) res: Response,
-  ) {
-    return this.authService.refreshToken(id, refresh_token, res);
+  ):Promise<ResponseFields> {
+    return this.authService.refreshToken(userId, refreshToken, res);
   }
+
+
 
   @ApiOperation({ summary: 'Create a new auth entry' })
   @ApiResponse({

@@ -62,3 +62,17 @@ model reason_lid {
 
   @@map("reason_lid")
 }
+
+model Staff {
+  id                 Int      @id @default(autoincrement())
+  first_name         String
+  last_name          String
+  phone_number       String
+  email              String   @unique
+  login              String   @unique
+  hashedPassword     String
+  hashedRefreshToken String?
+  is_active          Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updateAt           DateTime @default(now())
+}

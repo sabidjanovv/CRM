@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { Response } from 'express';
 import { User } from '@prisma/client';
+import { JwtPayload, ResponseFields, Tokens } from '../common/types';
 
 // import { User } from "@prisma/client"
 
@@ -15,8 +16,8 @@ export class AuthService {
     private readonly prismaService: PrismaService,
   ) {}
 
-  async generateTokens(user: User) {
-    const payload = {
+  async generateTokens(user: User): Promise<Tokens> {
+    const payload: JwtPayload = {
       id: user.id,
       email: user.email,
     };
@@ -45,7 +46,10 @@ export class AuthService {
     });
   }
 
-  async signup(createAuthDto: CreateAuthDto, res: Response) {
+  async signup(
+    createAuthDto: CreateAuthDto,
+    res: Response,
+  ): Promise<ResponseFields> {
     const candidate = await this.prismaService.user.findUnique({
       where: {
         email: createAuthDto.email,
@@ -74,10 +78,14 @@ export class AuthService {
       httpOnly: true,
     });
 
-    return { id: newUser.id, accesstoken: tokens.access_token };
+    return { id: newUser.id, accessToken: tokens.access_token };
   }
 
-  async signin(email: string, password: string, res: Response) {
+  async signin(
+    email: string,
+    password: string,
+    res: Response,
+  ): Promise<ResponseFields> {
     const user = await this.prismaService.user.findUnique({
       where: { email },
     });
@@ -98,10 +106,10 @@ export class AuthService {
       httpOnly: true,
     });
 
-    return { id: user.id, accesstoken: tokens.access_token };
+    return { id: user.id, accessToken: tokens.access_token };
   }
 
-  async signout(userId: number, res: Response) {
+  async signout(userId: number, res: Response): Promise<boolean>{
     await this.prismaService.user.updateMany({
       where: {
         id: userId,
@@ -113,28 +121,47 @@ export class AuthService {
     });
 
     res.clearCookie('refresh_token');
-    return { message: 'Tizimdan muvaffaqiyatli chiqildi' };
+    return true;
   }
 
-  async refreshToken(id: number, refresh_token: string, res: Response) {
+  async refreshToken(
+    id: number,
+    refresh_token: string,
+    res: Response,
+  ): Promise<ResponseFields> {
     try {
-      const verified_token = await this.jwtService.verify(refresh_token, {
-        secret: process.env.REFRESH_TOKEN_KEY,
+      // Refresh tokenni tekshirish
+      const user = await this.prismaService.user.findUnique({
+        where: { id },
       });
-      if (!verified_token) {
+
+      console.log(id);
+      
+
+      if (!user || !user.hashedRefreshToken) {
         throw new UnauthorizedException('Unauthorized token');
       }
-      if (id != verified_token.id) {
-        throw new ForbiddenException('Forbidden admin');
+
+      const refreshMatches = await bcrypt.compare(
+        refresh_token,
+        user.hashedRefreshToken,
+      );
+
+      if (!refreshMatches) {
+        throw new UnauthorizedException('Unauthorized token');
       }
-      const payload = { id: verified_token.id, email: verified_token.email };
-      const token = this.jwtService.sign(payload, {
-        secret: process.env.ACCESS_TOKEN_KEY,
-        expiresIn: process.env.ACCESS_TOKEN_TIME,
+
+      const payload: JwtPayload = { id: user.id, email: user.email };
+      const tokens = await this.generateTokens(user);
+      await this.updateRefreshToken(user.id, tokens.refresh_token);
+
+      // Yangi refresh tokenni cookie ga yozish
+      res.cookie('refresh_token', tokens.refresh_token, {
+        maxAge: +process.env.REFRESH_TIME_MS,
+        httpOnly: true,
       });
-      return {
-        token,
-      };
+
+      return { id: user.id, accessToken: tokens.access_token };
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
