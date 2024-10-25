@@ -1,4 +1,10 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateStaffDto, UpdateStaffDto } from './dto';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
@@ -169,10 +175,8 @@ export class StaffService {
     }
   }
 
-
-
   async findAll() {
-    return await this.prismaService.staff.findMany()
+    return await this.prismaService.staff.findMany();
   }
 
   async findOne(id: number) {
@@ -208,8 +212,8 @@ export class StaffService {
 
     await this.prismaService.staff.delete({
       where: { id },
-    })
+    });
 
-    return {message:"Staff deleted successfully"}
+    return { message: 'Staff deleted successfully' };
   }
 }

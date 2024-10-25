@@ -1,4 +1,10 @@
-import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateAuthDto, UpdateAuthDto } from './dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -109,7 +115,7 @@ export class AuthService {
     return { id: user.id, accessToken: tokens.access_token };
   }
 
-  async signout(userId: number, res: Response): Promise<boolean>{
+  async signout(userId: number, res: Response): Promise<boolean> {
     await this.prismaService.user.updateMany({
       where: {
         id: userId,
@@ -136,7 +142,6 @@ export class AuthService {
       });
 
       console.log(id);
-      
 
       if (!user || !user.hashedRefreshToken) {
         throw new UnauthorizedException('Unauthorized token');

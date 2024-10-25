@@ -75,4 +75,8 @@ model Staff {
   is_active          Boolean  @default(false)
   createdAt          DateTime @default(now())
   updateAt           DateTime @default(now())
+
+  @@map("staff")
 }
+
+

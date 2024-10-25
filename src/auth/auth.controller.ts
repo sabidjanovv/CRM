@@ -63,8 +63,6 @@ export class AuthController {
     return this.authService.signin(email, password, res);
   }
 
-
-
   @ApiOperation({ summary: 'Sign out a user' })
   @ApiResponse({
     status: 200,
@@ -78,11 +76,9 @@ export class AuthController {
     // @Body('userId') userId: number,
     @GetCurrentUserId() userId: number,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<boolean>{
+  ): Promise<boolean> {
     return this.authService.signout(+userId, res);
   }
-
-
 
   @ApiOperation({ summary: 'Refresh token' })
   @ApiResponse({
@@ -101,11 +97,9 @@ export class AuthController {
     @GetCurrentUser('refreshToken') refreshToken: string,
     @GetCurrentUser() user: JwtPayloadWithRefreshToken,
     @Res({ passthrough: true }) res: Response,
-  ):Promise<ResponseFields> {
+  ): Promise<ResponseFields> {
     return this.authService.refreshToken(userId, refreshToken, res);
   }
-
-
 
   @ApiOperation({ summary: 'Create a new auth entry' })
   @ApiResponse({

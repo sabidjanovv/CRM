@@ -14,11 +14,14 @@ import {
 import { StaffService } from './staff.service';
 import { CreateStaffDto, UpdateStaffDto } from './dto';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { GetCurrentStaff, GetCurrentStaffId, Public } from '../common/decorators';
+import {
+  GetCurrentStaff,
+  GetCurrentStaffId,
+  Public,
+} from '../common/decorators';
 import { RefreshTokenGuard } from '../common/guards';
 import { JwtPayloadWithRefreshToken, ResponseFields } from '../common/types';
 import { Response } from 'express';
-
 
 @Controller('staff')
 export class StaffController {

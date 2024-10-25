@@ -13,7 +13,9 @@ export class RoleService {
   }
 
   async findAll() {
-    return await this.prismaService.role.findMany();
+    return await this.prismaService.role.findMany({
+      // include: {staffs:{include: {staff:true}}}
+    });
   }
 
   async findOne(id: number) {
