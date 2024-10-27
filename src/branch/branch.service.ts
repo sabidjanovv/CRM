@@ -13,7 +13,9 @@ export class BranchService {
   }
 
   async findAll() {
-    return await this.prismaService.branch.findMany();
+    return await this.prismaService.branch.findMany({
+      include: { groups: true },
+    });
   }
 
   async findOne(id: number) {

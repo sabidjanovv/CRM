@@ -13,7 +13,7 @@ export class CreateBranchDto {
 
   @ApiProperty({
     description: 'The call number for the branch',
-    example: '+998901234567', // Example format for a UZ phone number
+    example: '+998901234567',
   })
   @IsString()
   @IsNotEmpty({ message: 'Please enter a valid call number' })

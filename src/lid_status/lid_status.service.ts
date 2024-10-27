@@ -7,17 +7,17 @@ export class LidStatusService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(createLidStatusDto: CreateLidStatusDto) {
-    return await this.prismaService.lid_status.create({
+    return await this.prismaService.lidStatus.create({
       data: createLidStatusDto,
     });
   }
 
   async findAll() {
-    return await this.prismaService.lid_status.findMany();
+    return await this.prismaService.lidStatus.findMany({include:{lids:true}});
   }
 
   async findOne(id: number) {
-    const lidStatus = await this.prismaService.lid_status.findUnique({
+    const lidStatus = await this.prismaService.lidStatus.findUnique({
       where: { id },
     });
     if (!lidStatus) {
@@ -27,7 +27,7 @@ export class LidStatusService {
   }
 
   async update(id: number, updateLidStatusDto: UpdateLidStatusDto) {
-    const lidStatus = await this.prismaService.lid_status.update({
+    const lidStatus = await this.prismaService.lidStatus.update({
       where: { id },
       data: updateLidStatusDto,
     });
@@ -38,13 +38,13 @@ export class LidStatusService {
   }
 
   async remove(id: number) {
-    const lidStatus = await this.prismaService.lid_status.findUnique({
+    const lidStatus = await this.prismaService.lidStatus.findUnique({
       where: { id },
     });
     if (!lidStatus) {
       throw new Error(`Lid status with ID ${id} not found`);
     }
-    await this.prismaService.lid_status.delete({
+    await this.prismaService.lidStatus.delete({
       where: { id },
     });
     return {message:"Lid status removed successfully"};

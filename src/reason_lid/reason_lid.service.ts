@@ -8,17 +8,17 @@ export class ReasonLidService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(createReasonLidDto: CreateReasonLidDto) {
-    return await this.prismaService.reason_lid.create({
+    return await this.prismaService.reasonLid.create({
       data: createReasonLidDto,
     });
   }
 
   async findAll() {
-    return await this.prismaService.reason_lid.findMany();
+    return await this.prismaService.reasonLid.findMany();
   }
 
   async findOne(id: number) {
-    const reasonLid = await this.prismaService.reason_lid.findUnique({
+    const reasonLid = await this.prismaService.reasonLid.findUnique({
       where: { id },
     });
 
@@ -29,7 +29,7 @@ export class ReasonLidService {
   }
 
   async update(id: number, updateReasonLidDto: UpdateReasonLidDto) {
-    const reasonLid = await this.prismaService.reason_lid.update({
+    const reasonLid = await this.prismaService.reasonLid.update({
       where: { id },
       data: updateReasonLidDto,
     });
@@ -41,13 +41,13 @@ export class ReasonLidService {
   }
 
   async remove(id: number) {
-    const reasonLid = await this.prismaService.reason_lid.findUnique({
+    const reasonLid = await this.prismaService.reasonLid.findUnique({
       where: { id },
     });
     if (!reasonLid) {
       throw new Error(`ReasonLid with ID ${id} not found`);
     }
-    await this.prismaService.reason_lid.delete({
+    await this.prismaService.reasonLid.delete({
       where: { id },
     });
     return { message: 'ReasonLid deleted successfully' };

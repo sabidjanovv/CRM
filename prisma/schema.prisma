@@ -26,57 +26,205 @@ model User {
 }
 
 model Branch {
-  id          Int      @id @default(autoincrement())
+  id          Int     @id @default(autoincrement())
   name        String
   address     String
   call_number String
-  createdAt   DateTime @default(now())
-  updateAt    DateTime @default(now())
+  groups      Group[]
 
   @@map("branches")
 }
 
 model Role {
-  id        Int      @id @default(autoincrement())
-  name      String
-  createdAt DateTime @default(now())
-  updateAt  DateTime @default(now())
+  id     Int         @id @default(autoincrement())
+  name   String      @unique
+  staffs StaffRole[]
 
   @@map("roles")
 }
 
-model lid_status {
-  id        Int      @id @default(autoincrement())
-  status    String
-  createdAt DateTime @default(now())
-  updateAt  DateTime @default(now())
+model LidStatus {
+  id     Int    @id @default(autoincrement())
+  status String
+  lids   Lid[]
 
   @@map("lid_status")
 }
 
-model reason_lid {
-  id         Int      @id @default(autoincrement())
+model ReasonLid {
+  id         Int     @id @default(autoincrement())
   reason_lid String?
-  createdAt  DateTime @default(now())
-  updateAt   DateTime @default(now())
+  lids       Lid[]
 
   @@map("reason_lid")
 }
 
+model Stage {
+  id     Int     @id @default(autoincrement())
+  name   String  @unique
+  lids   Lid[]
+  groups Group[]
+
+  @@map("stage")
+}
+
+model Target {
+  id     Int     @id @default(autoincrement())
+  name   String  @unique
+  lids   Lid[]
+
+  @@map("target")
+}
+
 model Staff {
-  id                 Int      @id @default(autoincrement())
+  id                 Int          @id @default(autoincrement())
   first_name         String
   last_name          String
   phone_number       String
-  email              String   @unique
-  login              String   @unique
+  email              String       @unique
+  login              String       @unique
   hashedPassword     String
   hashedRefreshToken String?
-  is_active          Boolean  @default(false)
-  createdAt          DateTime @default(now())
-  updateAt           DateTime @default(now())
+  is_active          Boolean      @default(false)
+  roles              StaffRole[]
+  groups             GroupStaff[]
 
   @@map("staff")
 }
 
+model StaffRole {
+  staff   Staff @relation(fields: [staffId], references: [id])
+  staffId Int
+  role    Role  @relation(fields: [roleId], references: [id])
+  roleId  Int
 
+  @@id([staffId, roleId])
+  @@map("staff_role")
+}
+
+// model StudentGroup {
+//   studentId Int
+//   groupId  Int
+
+//   student   Students @relation(fields: [studentId], references: [id])
+//   group    Group  @relation(fields: [groupId], references: [id])
+
+//   @@id([studentId, groupId])
+//   @@map("student_group")
+// }
+
+model Group {
+  id                Int     @id @default(autoincrement())
+  group_name        String  @unique
+  lesson_start_time String
+  lesson_continuous String
+  lesson_week_day   String
+  group_stage_id    Int
+  room_number       String
+  room_floor        Int
+  branch_id         Int
+  lessons_quant     Int
+  is_active         Boolean
+
+  stage  Stage  @relation(fields: [group_stage_id], references: [id])
+  branch Branch @relation(fields: [branch_id], references: [id])
+
+  staffs  GroupStaff[]
+  lessons Lesson[]
+  // students StudentGroup[]
+
+  @@map("groups")
+}
+
+model GroupStaff {
+  staff   Staff @relation(fields: [staffId], references: [id])
+  staffId Int
+  group   Group @relation(fields: [groupId], references: [id])
+  groupId Int
+
+  @@id([staffId, groupId])
+  @@map("group_staff")
+}
+
+model Lesson {
+  id            Int    @id @default(autoincrement())
+  lesson_theme  String
+  lesson_number Int
+  group_id      Int
+  lesson_date   String
+  group         Group  @relation(fields: [group_id], references: [id])
+
+  studentLessons StudentLesson[]
+
+  @@map("lessons")
+}
+
+model Students {
+  id                Int     @id @default(autoincrement())
+  lid_id            Int
+  payment_last_date String?
+  first_name        String
+  last_name         String
+  phone_number      String
+  birthday          String // 2005-06-13
+  gender            String
+  lid               Lid     @relation(fields: [lid_id], references: [id])
+
+  payments Payments[]
+  studentLessons StudentLesson[]
+  // groups StudentGroup[]
+  @@map("students")
+}
+
+model Lid {
+  id                    Int       @id @default(autoincrement())
+  first_name            String
+  last_name             String
+  phone_number          String
+  target_id             Int
+  lid_stage_id          Int
+  test_date             DateTime?
+  trial_lesson_date     DateTime?
+  trial_lesson_time     String?
+  trial_lesson_group_id Int?
+  lid_status_id         Int
+  cancel_reason_id      Int?
+
+  // Relationships
+  stage        Stage      @relation(fields: [lid_stage_id], references: [id])
+  target       Target     @relation(fields: [target_id], references:[id])
+  status       LidStatus  @relation(fields: [lid_status_id], references: [id])
+  cancelReason ReasonLid? @relation(fields: [cancel_reason_id], references: [id])
+  students     Students[]
+
+  @@map("lids")
+}
+
+
+model Payments {
+  id                Int     @id @default(autoincrement())
+  student_id        Int
+  payment_last_date String
+  payment_date      String
+  price             Float
+  is_paid           Boolean
+  total_attent      Int
+
+  student Students @relation(fields: [student_id], references: [id])
+
+  @@map("payments")
+}
+
+
+model StudentLesson {
+  id          Int      @id @default(autoincrement())
+  lesson_id   Int
+  student_id  Int
+  is_there    Boolean
+  reason      String?
+  be_paid     Boolean
+  student     Students  @relation(fields: [student_id], references: [id])
+  lesson      Lesson    @relation(fields: [lesson_id], references: [id])
+
+  @@map("student_lesson")
+}

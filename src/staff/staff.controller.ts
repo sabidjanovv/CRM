@@ -99,6 +99,11 @@ export class StaffController {
     return this.staffService.refreshToken(staffId, refreshToken, res);
   }
 
+  @Post('create')
+  create(@Body() createStaffDto: CreateStaffDto) {
+    return this.staffService.create(createStaffDto);
+  }
+
   @Get()
   findAll() {
     return this.staffService.findAll();

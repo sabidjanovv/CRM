@@ -7,15 +7,20 @@ export class RoleService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(createRoleDto: CreateRoleDto) {
-    return await this.prismaService.role.create({
-      data: createRoleDto,
+    const role = await this.prismaService.role.create({
+      data: {
+        name: createRoleDto.name,
+      },
     });
+    return role;
   }
 
   async findAll() {
-    return await this.prismaService.role.findMany({
-      // include: {staffs:{include: {staff:true}}}
+    const roles = await this.prismaService.role.findMany({
+      include: { staffs: { include: { staff: true } } },
     });
+
+    return roles;
   }
 
   async findOne(id: number) {
@@ -52,7 +57,7 @@ export class RoleService {
     await this.prismaService.role.delete({
       where: { id },
     });
-    
-    return {message:"Role removed successfully"};
+
+    return { message: 'Role removed successfully' };
   }
 }

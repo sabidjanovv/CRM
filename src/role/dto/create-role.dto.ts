@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsString } from "class-validator";
 
 export class CreateRoleDto {
-  @IsString()
+  @IsString({message:"Role must be a string not number"})
   @IsNotEmpty({ message: 'Please enter role' })
-  readonly name: string;
+  name: string;
 }

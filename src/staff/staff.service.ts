@@ -175,8 +175,60 @@ export class StaffService {
     }
   }
 
+  async create(createStaffDto: CreateStaffDto) {
+    const candidate = await this.prismaService.staff.findUnique({
+      where: {
+        login: createStaffDto.login,
+      },
+    });
+
+    if (candidate) {
+      throw new BadRequestException('Email already exists');
+    }
+
+    const role = await this.prismaService.role.findUnique({
+      where: { name: createStaffDto.role },
+    });
+
+    if (!role) {
+      throw new NotFoundException('Role does not exist');
+    }
+
+    if (createStaffDto.password !== createStaffDto.confirm_password) {
+      throw new BadRequestException('Password does not match');
+    }
+    const hashedPassword = await bcrypt.hash(createStaffDto.password, 10);
+
+    const newStaff = await this.prismaService.staff.create({
+      data: {
+        first_name: createStaffDto.first_name,
+        last_name: createStaffDto.last_name,
+        phone_number: createStaffDto.phone_number,
+        email: createStaffDto.email,
+        login: createStaffDto.login,
+        hashedPassword,
+        roles: {
+          create: [{ roleId: role.id }],
+        },
+        
+      },
+    });
+
+
+    return newStaff;
+  }
+
   async findAll() {
-    return await this.prismaService.staff.findMany();
+    return await this.prismaService.staff.findMany({
+      include: {
+        roles: {
+          include: { role: true },
+        },
+        groups:{
+          include:{group:true}
+        }
+      },
+    });
   }
 
   async findOne(id: number) {
